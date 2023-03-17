@@ -6,7 +6,7 @@ from shapely import geometry
 from mpl_toolkits.mplot3d import Axes3D
 import scipy.stats as stats
 import matplotlib as mpl
-import grid_generator
+import grid_generator_nbyn
 
 def graph_grid_2d(grid_obj) -> None:
 

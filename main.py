@@ -1,4 +1,4 @@
-import grid_generator
+import grid_generator_nbyn
 import plotter
 
 """
@@ -11,7 +11,8 @@ Good Seeds To Try:
 8
 """
 
-g = grid_generator.grid_generator(100, 8)
-plotter.graph_grid_2d(g)
+g = grid_generator_nbyn.grid_generator_nbyn(100, 8)
+plotter.graph_grid_3d(g)
 
 #test
+#test2
