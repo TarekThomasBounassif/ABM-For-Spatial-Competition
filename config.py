@@ -13,5 +13,5 @@ firm_params = {
 }
 
 simulation_params = {
-    'MaxIters': 100
+    'MaxIters': 500
 }

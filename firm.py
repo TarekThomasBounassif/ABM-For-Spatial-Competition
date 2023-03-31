@@ -24,7 +24,7 @@ class Firm:
         rev = 0
         for position in market_share[self.group]:
             rev += grid_in.system_grid[position[0], position[1]]
-        return rev * self.price
+        return rev # * self.price
         
     def update_rev(self, market_share:dict, grid_in:env_generator.EnvGrid) -> None:
         rev = self.evaluate_market_share(market_share, grid_in)
@@ -37,9 +37,9 @@ class Firm:
         """
         pos_x = self.position[1]
         potential_positions = []
-        if pos_x > 0 and pos_x < config.grid_params['Size']:
-            new_pos_left = [0, pos_x - 1]
-            new_pos_right = [0, pos_x + 1]
+        if pos_x > 1 and pos_x < config.grid_params['Size'] - 1:
+            new_pos_left = [0, pos_x - 2]
+            new_pos_right = [0, pos_x + 2]
             if new_pos_left not in firm_positions:
                 potential_positions.append(new_pos_left)
             if new_pos_right not in firm_positions:
