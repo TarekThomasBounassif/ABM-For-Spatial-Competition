@@ -1,12 +1,13 @@
 import numpy as np
 import random
+import gaussian_dist
 
-class grid_generator:
+class grid_generator_1byn:
 
     def __init__(self, size, flag, seed) -> None:
 
         if flag == "uniform":
-            self.grid = self.initialise_grid(size)
+            self.grid = self.initialise_grid_uniform(size)
         elif flag == "gaussian":
             self.grid = None
 
@@ -22,4 +23,7 @@ class grid_generator:
         Initialise 1 x N grid with gaussian population density. Each distribution will be centered
         at a point representing a population cetner. 
         """ 
+
+        gaussian = gaussian_dist.gaussian(0, random.randint(25, 50))
+
         return np.ones((1, size))
