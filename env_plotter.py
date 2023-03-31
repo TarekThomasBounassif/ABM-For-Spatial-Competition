@@ -1,19 +1,35 @@
 import numpy as np
-import random
-import math
 from matplotlib import pyplot as plt, cm, colors
-from shapely import geometry
-from mpl_toolkits.mplot3d import Axes3D
-import scipy.stats as stats
 import matplotlib as mpl
-import grid_generator_nbyn
+import env_generator
 
-def graph_grid_1byn(grid_obj) -> None:
-    population_data = grid_obj.grid
-    print(len(population_data))
-    plt.hist(population_data, bins=100)
-    plt.show()
-    return None
+
+def plot_1d_system(system:env_generator.EnvGrid) -> None:
+
+    data = [(index[1], value) for index, value in np.ndenumerate(system.system_grid)]
+    x, y = zip(*data)
+
+    fig, ax = plt.subplots()
+    ax.grid(True)
+
+    # Plot the points
+    plt.plot(x, y, '-', color='blue')
+    plt.fill_between(x, y, color='blue', alpha=0.2)
+
+    # Add labels and title 
+    plt.xlabel('Position Along 1 Dimensional System')
+    plt.ylabel('Population Density')
+    plt.title('Population Desnity Along 1 Dimensional System')
+
+    # Modify ticks
+    ticks = [i for i in range(0, system.size + 1) if i%10==0]
+    plt.xlim([min(x), max(x)])
+    plt.ylim([min(y), max(y)])
+    plt.xticks(ticks)
+    plt.yticks(ticks)
+
+    plt.margins(0)
+    plt.savefig('plots/1dnonuniformsystem.png')
 
 def graph_grid_2d(grid_obj) -> None:
 
