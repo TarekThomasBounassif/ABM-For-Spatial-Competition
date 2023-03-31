@@ -2,11 +2,26 @@ import numpy as np
 from matplotlib import pyplot as plt, cm, colors
 import matplotlib as mpl
 import env_generator
+import model
 
 
-def plot_1d_system(system:env_generator.EnvGrid) -> None:
+COLOR_DICT = {
+    0: plt.cm.tab10(0),
+    1: plt.cm.tab10(1),
+    2: plt.cm.tab10(2),
+    3: plt.cm.tab10(3),
+    4: plt.cm.tab10(4),
+    5: plt.cm.tab10(5),
+    6: plt.cm.tab10(6),
+    7: plt.cm.tab10(7),
+    8: plt.cm.tab10(8),
+    9: plt.cm.tab10(9),
+    10: plt.cm.tab10(10)
+}
 
-    data = [(index[1], value) for index, value in np.ndenumerate(system.system_grid)]
+def plot_1d_system(model_in:model.Model, with_firms:bool) -> None:
+
+    data = [(index[1], value) for index, value in np.ndenumerate(model_in.model_grid.system_grid)]
     x, y = zip(*data)
 
     fig, ax = plt.subplots()
@@ -17,20 +32,32 @@ def plot_1d_system(system:env_generator.EnvGrid) -> None:
     plt.fill_between(x, y, color='blue', alpha=0.2)
 
     # Add labels and title 
-    plt.xlabel('Position Along 1 Dimensional System')
-    plt.ylabel('Population Density')
-    plt.title('Population Desnity Along 1 Dimensional System')
+    plt.xlabel('Position Along 1 Dimensional System', fontstyle='italic')
+    plt.ylabel('Population Density', fontstyle='italic')
+    plt.title('Firm Locations In 1 Dimensional System After {iter} Iterations'.format(iter=model_in.iteration),
+               fontstyle='italic')
 
     # Modify ticks
-    ticks = [i for i in range(0, system.size + 1) if i%10==0]
+    ticks = [i for i in range(0, model_in.model_grid.size + 1) if i%10==0]
     plt.xlim([min(x), max(x)])
     plt.ylim([min(y), max(y)])
     plt.xticks(ticks)
     plt.yticks(ticks)
 
-    plt.margins(0)
-    plt.savefig('plots/1dnonuniformsystem.png')
+    if with_firms:
+        for firm_id in model_in.firm_dict.keys():
+            ax.axvline(
+                x=model_in.firm_dict[firm_id].position[1],
+                color=COLOR_DICT[firm_id],
+                linestyle='--',
+                label="Firm {id}".format(id=firm_id))
+            
+        ax.legend()
 
+    plt.margins(0)
+    plt.savefig('plots/1_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
+
+"""
 def graph_grid_2d(grid_obj) -> None:
 
     fig, ax = plt.subplots()
@@ -108,3 +135,4 @@ def graph_grid_3d(grid_obj) -> None:
     plt.show()
     return None
 
+"""

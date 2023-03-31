@@ -2,7 +2,6 @@ import numpy as np
 import random
 import math
 from shapely import geometry
-import utility
 import gaussian_dist
 
 
@@ -70,9 +69,6 @@ class EnvGrid:
                 distance_to_center = round(math.dist(center, [i, j]))
                 if distance_to_center < 100:
                     grid_in[i][j] += round(gaussian.generate_gaussian_value(distance_to_center) * 1000)
-
-        print(grid_in)
-
         return grid_in
     
     @staticmethod

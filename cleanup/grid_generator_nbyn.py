@@ -2,7 +2,7 @@ import numpy as np
 import random
 import math
 from shapely import geometry
-import utility
+import cleanup.utility as utility
 import gaussian_dist
 
 

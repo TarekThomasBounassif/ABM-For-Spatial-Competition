@@ -11,3 +11,7 @@ firm_params = {
     'StartPrice': 10,
     'Seed': 1
 }
+
+simulation_params = {
+    'MaxIters': 100
+}
