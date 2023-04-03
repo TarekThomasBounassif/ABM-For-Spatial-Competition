@@ -1,17 +1,19 @@
 grid_params = {
-    'Size': 100,
-    'Seed': 1,
-    'Dim':1,
+    'Size': 50,
+    'Seed': 7,
+    'Dim':2,
     'Uniform':False,
-    'ClusterCount':2
+    'ClusterCount':3
 }
 
 firm_params = {
-    'FirmCount': 4,
+    'FirmCount': 5,
     'StartPrice': 10,
-    'Seed': 1
+    'Seed': 3,
+    'PriceChanges':[-1,0,1]
 }
 
 simulation_params = {
-    'MaxIters': 500
+    'MaxIters': 200,
+    'WithPrice': True
 }

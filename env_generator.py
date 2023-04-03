@@ -75,3 +75,4 @@ class EnvGrid:
     def get_random_point(grid_in:np.ndarray) -> list():
         return [random.randint(0, grid_in.shape[0] - 1), random.randint(0, grid_in.shape[1] - 1)]
 
+ 

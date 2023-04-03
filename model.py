@@ -3,24 +3,35 @@ import firm
 import env_generator
 import numpy as np
 import math
+import config
 
 class Model:
 
     def __init__(self, grid_params:dict, firm_params) -> None:
-
+        
+        # Iterations passed
         self.iteration = 0
+
+        # Params of the env and the firms
         self.grid_params = grid_params
         self.firm_params = firm_params
 
+        # Does model allow price changes
+        self.with_price = config.simulation_params['WithPrice']
+
+        # Setup grid and firms
         self.model_grid = self.setup_grid()
-        
         self.firm_groups = list()
         self.firm_dict = dict()
         
+        # Create firm objects
         self.setup_firms()
-        self.firm_market_shares = self.assign_consumers(self.firm_dict, self.model_grid)
+
+        # Setup initial
+        firm_start_positions = self.list_firm_locations()
+        self.firm_market_shares = self.assign_consumers_new(firm_start_positions, self.model_grid)
         self.update_firm_revenue()
-    
+
     def setup_grid(self) -> env_generator.EnvGrid:
         return env_generator.EnvGrid(
             self.grid_params['Size'],
@@ -41,60 +52,12 @@ class Model:
 
     def update_firm_revenue(self) -> None:
         for firm_id in self.firm_dict.keys():
-            self.firm_dict[firm_id].update_rev(self.firm_market_shares, self.model_grid)
-        
-    def evaluate_pos(self, grid_in:env_generator.EnvGrid, pos:list) -> int:
-        """
-        Return revenue firm would get IF positioned at pos
-        """
-        return 0
+            self.firm_dict[firm_id].initialise_rev(self.firm_market_shares, self.model_grid)
     
-    def consider_pos(self, firm_id, new_pos) -> None:
-        """
-        Allow a firm to consider its revenue at a new position
-        """
-
-        # Temporarily change firm location to new pos (Keeping track of old pos)
-        old_pos = self.firm_dict[firm_id].position
-
-        firms = dict()
-        for id in self.firm_dict.keys():
-            if id == firm_id:
-                firms[id] = firm.Firm(new_pos, id, 0)
-            else:
-                firms[id] = firm.Firm(old_pos, id, 0)
-
-        old_market_share = self.assign_consumers(self.firm_dict, self.model_grid)
-        old_rev = sum(self.model_grid.system_grid[pos[0], pos[1]] for pos in old_market_share[firm_id])
-        
-        new_market_share = self.assign_consumers(firms, self.model_grid)
-        new_rev = sum(self.model_grid.system_grid[pos[0], pos[1]] for pos in new_market_share[firm_id])
-
-        if firm_id == 0 and self.iteration == 1:
-            print("-"*100)
-            print("Current Firm : {id}".format(id=firm_id))
-            self.display_firms(self.firm_dict)
-            self.display_firms(firms)
-            print("Old Rev : {old_rev}".format(old_rev=old_rev))
-            print("New Rev : {new_rev}".format(new_rev=new_rev))
-            print("Old Pos = " + str(old_pos))
-            print("New Pos = " + str(new_pos))
-            print("Old M share : " + str(len(old_market_share[firm_id])))
-            print(sorted(old_market_share[firm_id], key=lambda x: x[1]))
-            print("New M share : " + str(len(new_market_share[firm_id])))
-            print(sorted(new_market_share[firm_id], key=lambda x: x[1]))
-            print("-"*100)
-
-        return new_rev
-    
-
     def consider_pos_new(self, firm_id, new_pos) -> None:
         """
         Allow a firm to consider its revenue at a new position
         """
-
-        # Temporarily change firm location to new pos (Keeping track of old pos)
-        old_pos = self.firm_dict[firm_id].position
 
         old_firm_list = []
         for id in self.firm_groups:
@@ -103,33 +66,48 @@ class Model:
         new_firm_list = old_firm_list.copy()
         new_firm_list[firm_id] = new_pos
 
+
         old_market_share = self.assign_consumers_new(old_firm_list, self.model_grid)
         old_rev = sum(self.model_grid.system_grid[pos[0], pos[1]] for pos in old_market_share[firm_id])
         
         new_market_share = self.assign_consumers_new(new_firm_list, self.model_grid)
         new_rev = sum(self.model_grid.system_grid[pos[0], pos[1]] for pos in new_market_share[firm_id])
 
-        if firm_id == 1 and self.iteration < 10:
-            print("-"*100)
-            print("Current Firm : {id}".format(id=firm_id))
-            print(old_firm_list)
-            print(new_firm_list)
-            print("Old Rev : {old_rev}".format(old_rev=old_rev))
-            print("New Rev : {new_rev}".format(new_rev=new_rev))
-            print("Old Pos = " + str(old_pos))
-            print("New Pos = " + str(new_pos))
-            print("Old M share : " + str(len(old_market_share[firm_id])))
-            print(sorted(old_market_share[firm_id], key=lambda x: x[1]))
-            print("New M share : " + str(len(new_market_share[firm_id])))
-            print(sorted(new_market_share[firm_id], key=lambda x: x[1]))
-            print("-"*100)
-
         return new_rev, old_rev
+
+    def consider_pos_with_price(self, firm_id, new_pos, price_change) -> None:
+        """
+        Allow a firm to consider its revenue at a new position
+        """
+
+        old_firm_list = []
+        for id in self.firm_groups:
+            old_firm_list.append(self.firm_dict[id].position)
+        
+        new_firm_list = old_firm_list.copy()
+        new_firm_list[firm_id] = new_pos
+
+        current_price = self.firm_dict[firm_id].price
+        new_price = current_price + price_change
+
+        #old_market_share = self.assign_consumers_with_price(old_firm_list, self.model_grid, firm_id, price_change)
+        old_market_share = self.assign_consumers_with_price_new(self.model_grid, firm_id, new_pos, price_change)
+        old_market_share_size = len(old_market_share)
+        old_rev = sum(self.model_grid.system_grid[pos[0], pos[1]] for pos in old_market_share[firm_id]) * current_price
+        
+        #new_market_share = self.assign_consumers_with_price(new_firm_list, self.model_grid, firm_id, price_change)
+        new_market_share = self.assign_consumers_with_price_new(self.model_grid, new_pos, firm_id, price_change)
+        new_market_share_size = len(new_market_share)
+        new_rev = sum(self.model_grid.system_grid[pos[0], pos[1]] for pos in new_market_share[firm_id]) * new_price
+
+        return new_rev, new_market_share_size, old_rev, old_market_share_size
     
-    def assign_consumers(self, firms:dict, grid_in:env_generator.EnvGrid) -> dict:
+    def assign_consumers_new(self, firms:list, grid_in:env_generator.EnvGrid) -> dict:
+
         """
         Assign positions to their closest firm
         """
+
         # Setup market share for each firm
         market_shares = dict()
         for group in self.firm_groups:
@@ -137,15 +115,19 @@ class Model:
 
         # Assign each position to a firms market share
         for (i,j) in np.ndindex(grid_in.system_grid.shape):
-            closest_firm_id = self.get_closest_firm([i,j], firms)
+
+            closest_firm_id = self.get_closest_firm_new([i,j], firms)
+
             # Update market share of each firm
             market_shares[closest_firm_id].append([i, j])
         return market_shares
     
-    def assign_consumers_new(self, firms:list, grid_in:env_generator.EnvGrid) -> dict:
+    def assign_consumers_with_price(self, firms:list, grid_in:env_generator.EnvGrid, firm_id:int, price_change:int) -> dict:
+       
         """
         Assign positions to their closest firm
         """
+
         # Setup market share for each firm
         market_shares = dict()
         for group in self.firm_groups:
@@ -153,15 +135,37 @@ class Model:
 
         # Assign each position to a firms market share
         for (i,j) in np.ndindex(grid_in.system_grid.shape):
-            closest_firm_id = self.get_closest_firm_new([i,j], firms)
+            
+            closest_firm_id = self.get_optimal_firm([i,j], firms, firm_id, price_change)
+            # Update market share of each firm
+            market_shares[closest_firm_id].append([i, j])
+        return market_shares
+    
+    def assign_consumers_with_price_new(self, grid_in:env_generator.EnvGrid, new_pos:list, firm_id:int, price_change:int) -> dict:
+       
+        """
+        Assign positions to their closest firm
+        """
+
+        # Setup market share for each firm
+        market_shares = dict()
+        for group in self.firm_groups:
+            market_shares[group] = []
+
+        # Assign each position to a firms market share
+        for (i,j) in np.ndindex(grid_in.system_grid.shape):
+            
+            closest_firm_id = self.get_optimal_firm_new([i,j], new_pos, firm_id, price_change)
             # Update market share of each firm
             market_shares[closest_firm_id].append([i, j])
         return market_shares
     
     def get_closest_firm_new(self, pos:list, firms:list) -> firm.Firm:
+        
         """
         Return closest firm to a pos
         """
+        
         min_dist = math.inf
         closest_firm = None
         for index, firm_position in enumerate(firms):
@@ -170,20 +174,51 @@ class Model:
                 min_dist = dist
                 closest_firm = index
         return closest_firm
-
-    def get_closest_firm(self, pos:list, firms:dict) -> firm.Firm:
+    
+    def get_optimal_firm(self, pos:list, firms:list, firm_id:int, price_change:int) -> int:
+       
         """
         Return closest firm to a pos
         """
-        min_dist = math.inf
-        closest_firm = None
-        for firm_id in firms.keys():
-            dist = math.dist(pos, firms[firm_id].position)
-            if dist <= min_dist:
-                min_dist = dist
-                closest_firm = firm_id
-        return closest_firm
-    
+        
+        total_cost = math.inf
+        best_firm = None
+        for index, firm_position in enumerate(firms):
+            move_cost = math.dist(pos, firm_position)
+            if index != firm_id:
+                price = self.firm_dict[index].price
+            else:
+                price = self.firm_dict[index].price + price_change
+            net_cost = move_cost + price
+            if net_cost < total_cost:
+                total_cost = net_cost
+                best_firm = index
+
+        return best_firm
+
+    def get_optimal_firm_new(self, pos:list, new_pos:list, id:int, price_change:int) -> int:
+       
+        """
+        Return the best firm choice to a pos, given a potential new location and price change for a firm.
+        This method will be used to evaluate a change in price and loction, this method represents the new best
+        firm from a position IF a firm decides to alter its position and price. 
+        """
+        
+        total_cost = math.inf
+        best_firm = None
+
+        for firm_id in self.firm_dict.keys():
+            current_firm = self.firm_dict[firm_id]
+            if firm_id != id:
+                cost = math.dist(pos, current_firm.position) + current_firm.price
+            else:
+                cost = math.dist(pos, new_pos) + current_firm.price + price_change
+            if cost < total_cost:
+                total_cost = cost
+                best_firm = firm_id 
+
+        return best_firm
+
     def list_firm_locations(self) -> list:
         """
         Return list of all positions firms take
@@ -192,25 +227,14 @@ class Model:
         for firm_id in self.firm_dict.keys():
             firm_positions.append(self.firm_dict[firm_id].position)
         return firm_positions
-    """
-    def firm_rev(self, market_share:dict, firm_id:int) -> int:
-        rev = 0
-        for position in market_share[firm_id]:
-            rev += self.model_grid.system_grid[position[0], position[1]]
 
-        if firm_id == 1 and self.iteration == 1:
-            print("1's m share")
-            print(len(market_share[1]))
-            print("1's rev")
-            print(rev)
-        return rev
-    """
     def display_firms(self, firms:dict) -> None:
+        """
+        Print out firm info
+        """
         print("="*100)
         for id in firms:
             print("Firm ID : " + str(id) + " Pos : " + str(firms[id].position))
-            
-
 
     def log_system(self) -> None:
         print("-"*100)
