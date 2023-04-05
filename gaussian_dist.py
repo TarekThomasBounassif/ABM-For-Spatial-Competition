@@ -1,11 +1,5 @@
 import numpy as np
-import random
-import math
-from matplotlib import pyplot as plt, cm, colors
-from shapely import geometry
-from mpl_toolkits.mplot3d import Axes3D
 import scipy.stats as stats
-import matplotlib as mpl
 
 class gaussian:
 

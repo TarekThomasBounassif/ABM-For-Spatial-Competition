@@ -26,7 +26,7 @@ def plot_1d_system(model_in:model.Model, with_firms:bool) -> None:
     data = [(index[1], value) for index, value in np.ndenumerate(model_in.model_grid.system_grid)]
     x, y = zip(*data)
 
-    fig, ax = plt.subplots(figsize=(8,5))
+    fig, ax = plt.subplots(figsize=(8,6))
     ax.grid(True)
 
     # Plot the points
@@ -34,10 +34,9 @@ def plot_1d_system(model_in:model.Model, with_firms:bool) -> None:
     plt.fill_between(x, y, color='blue', alpha=0.2)
 
     # Add labels and title 
-    plt.xlabel('Position Along 1 Dimensional System', fontstyle='italic')
-    plt.ylabel('Population Density', fontstyle='italic')
-    plt.title('Firm Locations In 1 Dimensional System After {iter} Iterations'.format(iter=model_in.iteration),
-               fontstyle='italic')
+    plt.xlabel('Position Along 1 Dimensional System')
+    plt.ylabel('Population Density')
+    #plt.title('1 Dimensional System After {iter} Iterations'.format(iter=model_in.iteration), fontstyle='italic')
 
     # Modify ticks
     ticks = [i for i in range(0, model_in.model_grid.size + 1) if i%10==0]
@@ -59,27 +58,6 @@ def plot_1d_system(model_in:model.Model, with_firms:bool) -> None:
     plt.margins(0)
     plt.savefig('plots/1d/1_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
 
-"""
-def graph_grid_2d(grid_obj) -> None:
-
-    fig, ax = plt.subplots()
-    plot = ax.imshow(grid_obj.grid_master)
-
-    print(grid_obj.grid_master)
-    np.set_printoptions(threshold=np.inf, linewidth=np.inf)  # turn off summarization, line-wrapping
-    with open("test", 'w') as f:
-        f.write(np.array2string(grid_obj.grid_master, separator=', '))
-    cbar = fig.colorbar(plot, ax=ax, shrink=1)
-    cbar.set_ticks([0, 50, 100])
-    cbar.set_ticklabels(['0', '50', '100'])
-    ax.set_title("Population Desity Map")
-    fig.tight_layout()
-    plt.gca().invert_yaxis()
-    plt.show()    
-    
-    return None
-"""
-
 def plot_2d_system(model_in) -> None:
     
     grid_obj = model_in.model_grid
@@ -91,11 +69,6 @@ def plot_2d_system(model_in) -> None:
     ### FIGURE 1 - 3D PLOT ###
 
     ax = fig.add_subplot(111, projection='3d')
-    ax.xaxis.pane.fill = False
-    ax.xaxis.pane.set_edgecolor('white')
-    ax.zaxis.pane.fill = False
-    ax.zaxis.pane.set_edgecolor('white')
-    ax.grid(False)
 
     ticks = [numb for numb in range(0, grid_obj.size)]
 
@@ -124,7 +97,7 @@ def plot_2d_system(model_in) -> None:
             zorder=2
         )
         
-        ax.legend()
+        ax.legend(fontsize=7)
 
     plot = ax.plot_surface(
         X=X,
@@ -142,8 +115,8 @@ def plot_2d_system(model_in) -> None:
     ax.dist=11
 
     # Set tick marks
-    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(20))
-    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(20))
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
     
     # Set axis labels
     ax.set_xlabel("Longitude", labelpad=10)
@@ -157,55 +130,6 @@ def plot_2d_system(model_in) -> None:
     plt.margins(0)
     plt.savefig('plots/2d/2_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
     return None
-
-
-def plot_price_history(model_in, exp_name:str) -> None:
-
-    # Plot Price Evolution
-    price_history_list = [
-        model_in.firm_dict[firm_id].price_history for firm_id in model_in.firm_dict.keys()
-    ]
-    revenue_history_list = [
-        model_in.firm_dict[firm_id].revenue_history for firm_id in model_in.firm_dict.keys()
-    ]
-
-    print(revenue_history_list)
-
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5), sharey=False)
-
-    fig.suptitle('2 Dimensions, Non Uniform Population Desnity, I={iter} Iterations, N={firm_count}'.format(
-        iter=model_in.iteration,
-        firm_count=len(model_in.firm_dict.keys())
-        ),
-        fontstyle='oblique'
-    )
-
-    ax1.grid(True)
-    for i, price_history in enumerate(price_history_list):
-        print(price_history)
-        ax1.plot(price_history, label=f"Firm : {i+1}")
-    ax1.legend(fontsize=5)
-    ax1.set_title('Price Evolution',
-        fontstyle='italic'
-    )
-    ax1.set_xlabel("Iteration")
-    ax1.set_ylabel("Price")
-    ax1.set_xmargin(0)
-    ax1.set_ymargin(0)
-    
-    # Plot revenue evolution
-    ax2.grid(True)
-    for i, revenue_history in enumerate(revenue_history_list):
-        ax2.plot([rev // 1000 for rev in revenue_history], label=f"Firm : {i+1}")
-    ax2.set_title('Revenue Evolution (Thousands Of Units)',
-        fontstyle='italic'
-    )
-    ax2.set_xlabel("Iteration")
-    ax2.set_ylabel("Revenue")
-    ax2.set_xmargin(0)#
-    ax2.set_ymargin(0)
-
-    plt.savefig('plots/price_charts/{exp}.png'.format(exp=exp_name))
 
 def get_distance_to_closest_firm(pos:list, firm_positions:list) -> None:
     """
@@ -306,12 +230,130 @@ def desnity_map(model_in, exp_name):
     # show the plot
     plt.show()
 
-def plot_distance_to_closest_firm(model_in, exp_name):
+def plot_2d_system_2(model_in) -> None:
+    
+    grid_obj = model_in.model_grid
+    
+    fig = plt.figure(figsize=(4, 4))
+    #fig.subplots_adjust(left=0.4, right=0.9, bottom=0.1, top=0.9, wspace=0.2, hspace=0.2)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5), sharey=False)
+    #fig.suptitle('Population Desinity Map With N = {n} Poulation Clusters'.format(n=3) , fontsize=16)
+
+    ### FIGURE 1 - 3D PLOT ###
+
+    ax = fig.add_subplot(111, projection='3d')
+
+    ticks = [numb for numb in range(0, grid_obj.size)]
+
+    # Create meshgrid
+    X, Y = np.meshgrid(ticks, ticks)
+    
+    for firm_id in model_in.firm_dict.keys():
+
+        ax.plot(
+            [model_in.firm_dict[firm_id].position[0],model_in.firm_dict[firm_id].position[0]],
+            [model_in.firm_dict[firm_id].position[1],model_in.firm_dict[firm_id].position[1]],
+            [0, 150],
+            'k--',
+            alpha=0.95,
+            linewidth=1,
+            color=COLOR_DICT[firm_id],
+            zorder=3
+        )
+            
+        ax.scatter(
+            model_in.firm_dict[firm_id].position[0], 
+            model_in.firm_dict[firm_id].position[1],
+            100,
+            color=COLOR_DICT[firm_id],
+            label="Firm {id}".format(id=firm_id),
+            zorder=2
+        )
+        
+        ax.legend(fontsize=7)
+
+    plot = ax.plot_surface(
+        X=X,
+        Y=Y,
+        Z=grid_obj.system_grid,
+        cmap='YlGnBu',
+        vmin=0,
+        vmax=100, 
+        alpha=0.9,
+        zorder=0
+    )
+    ax.computed_zorder = False
+    # Adjust plot view
+    ax.view_init(elev=40, azim=225)
+    ax.dist=11
+
+    # Set tick marks
+    ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
+    ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
+    
+    # Set axis labels
+    ax.set_xlabel("Longitude", labelpad=10)
+    ax.set_ylabel("Latitude", labelpad=10)
+    ax.set_zlabel("Population Desnity", labelpad=10)
+    #ax.set_title('2 Dimensional System After {iter} Iterations'.format(iter=model_in.iteration),
+    #           fontstyle='italic')
+    
+    # Set z-limit
+    ax.set_zlim(0, 100)
+    plt.margins(0)
+    plt.savefig('plots/2d/2_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
+    return None
+
+def plot_price_history_only(model_in, ax) -> None:
+
+    price_history_list = [
+        model_in.firm_dict[firm_id].price_history for firm_id in model_in.firm_dict.keys()
+    ]
+    max_price = 0
+    for i, price_history in enumerate(price_history_list):
+        max_p = max(price_history)
+        if max_p > max_price:
+            max_price = max_p
+        ax.plot(price_history, label=f"Firm : {i+1}")
+        ax.legend(fontsize=5)
+
+    # Add a grid background
+    ax.grid()
+
+    # Set the x and y labels
+    ax.set_xlabel("Iteration", fontweight='bold', fontstyle='italic')
+    ax.set_ylabel("Price", fontweight='bold', fontstyle='italic')
+    ax.set_xmargin(0)
+    ax.set_ymargin(0)
+    ax.grid(True)
+    ax.set_ylim(-2, max_price * 1.1)
+    
+
+def plot_rev_history_only(model_in, ax) -> None:
+
+    revenue_history_list = [
+        model_in.firm_dict[firm_id].revenue_history for firm_id in model_in.firm_dict.keys()
+    ]
+
+    max_rev = 0
+    for i, revenue_history in enumerate(revenue_history_list):
+        max_r = max(revenue_history)
+        if max_r > max_rev:
+            max_rev = max_r
+        ax.plot([rev // 1000 for rev in revenue_history], label=f"Firm : {i+1}")
+        ax.legend(fontsize=5)
+
+    ax.set_xlabel("Iteration", fontweight='bold', fontstyle='italic')
+    ax.set_ylabel("Revenue (Thousands Of Units)", fontweight='bold', fontstyle='italic')
+    ax.set_xmargin(0)
+    ax.set_ymargin(0)
+    ax.grid(True)
+    ax.set_ylim(-2, (max_rev / 1000) * 1.1)
+
+def plot_distance_to_closest_firm(model_in, ax):
 
     # Plot Evolution Of Distance To Closest Firm
-    ax2.grid(True)
+    
     firm_locations = model_in.list_firm_locations()
     distance_lists = []
     for firm_id in model_in.firm_dict.keys():
@@ -323,15 +365,42 @@ def plot_distance_to_closest_firm(model_in, exp_name):
             dist_to_closest_firm.append(d)
         distance_lists.append(dist_to_closest_firm)
 
+    max_dist = 0
     for i, distance_list in enumerate(distance_lists):
-        ax2.plot(distance_list, label=f"Firm : {i+1}")
-    ax2.legend()
-    ax2.set_xlabel("Iteration")
-    ax2.set_ylabel("Distance To Closest Firm")
-    ax2.set_title('Distance To Closest Firm',
-        fontstyle='italic'
-    )
+        max_d = max(distance_list)
+        if max_d > max_dist:
+            max_dist = max_d
+        ax.plot(distance_list, label=f"Firm : {i+1}")
 
-    ax2.set_xmargin(0)
-    ax2.set_ymargin(0)
+
+    ax.legend()
+    ax.set_xlabel("Iteration", fontweight='bold', fontstyle='italic')
+    ax.set_ylabel("Distance To Closest Firm", fontweight='bold', fontstyle='italic')
+    ax.grid(True)
+    ax.set_xmargin(0)
+    ax.set_ymargin(0)
+    ax.set_ylim(-2, max_dist * 1.1)
+
+def plot_combine(model_in):
+    # Create the figure and subplots
+    #fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5), sharey=False)
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10), sharey=False)
+
+    # Plot the price history in the first subplot
+    plot_price_history_only(model_in, ax=axs[0, 0])
+
+    # Plot the revenue history in the second subplot
+    plot_rev_history_only(model_in, ax=axs[0, 1])
+
+    plot_distance_to_closest_firm(model_in, ax=axs[1, 0])
+
+    fig.set_facecolor('0.9')
+    fig.set_edgecolor('black')
+    # Show the plot
+    plt.savefig('plots/price_charts/{exp}.png'.format(exp="1"))
+    plt.show()
+
+
+
+
 
