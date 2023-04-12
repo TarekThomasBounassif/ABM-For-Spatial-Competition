@@ -3,6 +3,8 @@ import firm
 import env_generator
 import numpy as np
 import math
+from typing import Tuple
+import random
 
 class Model:
 
@@ -23,6 +25,9 @@ class Model:
         self.model_grid = self.setup_grid()
         self.firm_groups = list()
         self.firm_dict = dict()
+        self.seed =  grid_params['Seed']
+        random.seed(self.seed)
+
         
         # Create firm objects
         self.setup_firms()
@@ -61,9 +66,10 @@ class Model:
                         min_dist = min_d
                 if min_dist > (self.grid_params['Size'] / 6):
                     self.firm_dict[i] = firm.Firm(starting_pos, i, self.firm_params['StartPrice'])
+                    #self.firm_dict[i] = firm.Firm(starting_pos, i, random.randint(10, 30))
                     break 
 
-    def consider_position(self, firm_id:int, new_pos:list, price_change:int=None) -> int:
+    def consider_position(self, firm_id:int, new_pos:list, price_change:int=None) -> Tuple[int, int]:
         """
         Allow a firm to consider its revenue at a new position with a price change.
 
@@ -73,6 +79,7 @@ class Model:
             price_change (int, optional): The price change being considered, null if price changes are disabled.
 
         Returns:
+            Tuple(int, int): The first element is the new revenue, and the second is the market share of the firm. 
             
         """
 
@@ -84,8 +91,8 @@ class Model:
             new_rev = new_market_share_for_firm * new_price
         else:
             new_rev = new_market_share_for_firm
-
-        return new_rev, new_market_share_for_firm
+        
+        return (new_rev, new_market_share_for_firm, new_market_share)
     
     def assign_consumers(self, grid_in:env_generator.EnvGrid, new_pos:list, firm_id:int, price_change:int=None) -> dict:
         """
@@ -109,7 +116,6 @@ class Model:
 
         # Assign each position to a firms market share
         for (i, j) in np.ndindex(grid_in.system_grid.shape):
-            
             if price_change != None:
                 closest_firm_id = self.get_optimal_firm([i,j], new_pos, firm_id, price_change)
             else:
@@ -117,6 +123,7 @@ class Model:
 
             # Update market share of each firm
             market_shares[closest_firm_id].append([i, j])
+
         return market_shares
 
     def get_optimal_firm(self, pos:list, new_pos:list, id:int, price_change:int=None) -> int:
@@ -164,4 +171,4 @@ class Model:
         Return list of all positions.
         """
         return [self.firm_dict[firm_id].position for firm_id in self.firm_dict.keys()]
-
+    

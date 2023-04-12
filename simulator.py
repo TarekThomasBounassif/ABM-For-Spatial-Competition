@@ -16,6 +16,7 @@ class Simulator:
         self.simulation_params = simulation_params
         self.grid_params = grid_params
         self.firm_params = firm_params
+        self.market_share_list_history = list()
 
     def simulate(self) -> None:
 
@@ -27,12 +28,14 @@ class Simulator:
 
             # Log The Simulation
             if self.model_env.iteration % (self.simulation_params['MaxIters']/4) == 0:
-                self.log_sim()
-                print(self.model_env.iteration)
+                #self.log_sim()
+                #print(self.model_env.iteration)
+                pass
 
             # Randomise the order firms take to move
             firm_list_random = list(self.model_env.firm_dict.keys())
             random.shuffle(firm_list_random)
+            current_mshare_list = list()
 
             for firm_id in firm_list_random:
 
@@ -54,18 +57,22 @@ class Simulator:
                 current_mshare = current_firm.market_share
                 best_position = current_firm.position
                 current_price = current_firm.price
+                
 
                 # Evaluate each potential position
-                for pos in potential_positions:
+                for index1, pos in enumerate(potential_positions):
                     
                     # If pirce changes are allowed
                     if self.with_price:
 
                         # Go through each potential change to price
-                        for price_change in self.firm_params['PriceChanges']:
+                        for index2, price_change in enumerate(self.firm_params['PriceChanges']):
 
                             if current_price + price_change > 0:
-                                new_rev, new_mshare_size = self.model_env.consider_position(firm_id, pos, price_change)
+                                exploration_results = self.model_env.consider_position(firm_id, pos, price_change)
+                                new_rev = exploration_results[0]
+                                new_mshare_size = exploration_results[1]
+                                new_mshare_list = exploration_results[2]
 
                                 # If its the first move and first iteration, update the firms initial revenue and market share.
                                 if pos == current_firm.position and self.model_env.iteration == 0:
@@ -83,10 +90,14 @@ class Simulator:
                                         best_position = pos
                                         current_mshare = new_mshare_size
                                         current_price = current_price + price_change
-
+                                        current_mshare_list = new_mshare_list
+                                    
                     # If price changes are not enabled
                     else:
-                        new_rev, new_mshare_size = self.model_env.consider_position(firm_id, pos, None)
+                        exploration_results = self.model_env.consider_position(firm_id, pos)
+                        new_rev = exploration_results[0]
+                        new_mshare_size = exploration_results[1]
+                        new_mshare_list = exploration_results[2]
 
                         # If its the first move and first iteration, update the firms initial revenue and market share.
                         if pos == current_firm.position and self.model_env.iteration == 0:
@@ -96,11 +107,13 @@ class Simulator:
                                 self.model_env.firm_dict[firm_id].market_share_history.append(new_mshare_size)
                                 current_rev = new_rev
                                 current_mshare = new_mshare_size
+                                current_mshare_list = new_mshare_list
                         else:
                             if new_rev > current_rev:
                                 current_rev = new_rev
                                 best_position = pos
                                 current_mshare = new_mshare_size
+                                current_mshare_list = new_mshare_list
 
                 # Update Firm Objects & Histories, even if changes are not made, track history
                 self.model_env.firm_dict[firm_id].position = best_position
@@ -111,6 +124,13 @@ class Simulator:
                 self.model_env.firm_dict[firm_id].price_history.append(current_price)
                 self.model_env.firm_dict[firm_id].market_share = current_mshare
                 self.model_env.firm_dict[firm_id].market_share_history.append(current_mshare)
+
+            current_mshare_list = self.model_env.assign_consumers(
+                self.model_env.model_grid,
+                self.model_env.firm_dict[0].position,
+                None)
+            
+            self.market_share_list_history.append(current_mshare_list)
 
             self.model_env.iteration += 1
 

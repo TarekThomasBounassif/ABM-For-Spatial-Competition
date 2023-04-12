@@ -16,9 +16,14 @@ class EnvGrid:
         self.cluster_count = cluster_count
         self.cluster_centers = list()
 
+        # Store the total number of consumers in the market
+        self.total_market_size = 0
+
         # Store the map
         self.system_grid = None
         self.initialise_env()
+
+        
 
     def initialise_env(self) -> np.ndarray:
         """
@@ -46,6 +51,8 @@ class EnvGrid:
                 self.generate_clusters(system_grid)
                 system_grid = self.plot_population(system_grid)
 
+        self.total_market_size = np.sum(np.sum(system_grid))
+        #print(self.total_market_size)
         self.system_grid = system_grid
 
     def generate_clusters(self, grid_in:np.ndarray) -> None:
@@ -69,6 +76,7 @@ class EnvGrid:
         """
         Allow a firm to consider its revenue at a new position with a price change.
         This method will plot a population density following a normal distribution centered at each cluster center.
+        Also track the total size of the market.
 
         Args:
             grid_in (np.ndarray): The grid representing the market.
@@ -77,15 +85,19 @@ class EnvGrid:
             grid_in (np.ndarray): The grid representing the market with a non-uniform population desnity plotted. 
             
         """
+
+        total_pop = 0
         for center in self.cluster_centers:
-            gaussian = gaussian_dist.gaussian(0, random.randint(25, 50))
+            gaussian = gaussian_dist.gaussian(0, random.randint(50, 75))
             for (i,j) in np.ndindex(grid_in.shape):
                 distance_to_center = round(math.dist(center, [i, j]))
                 if distance_to_center < 100:
                     grid_in[i][j] += round(gaussian.generate_gaussian_value(distance_to_center) * 1000)
+                    
+        self.total_market_size = total_pop
         return grid_in
     
-    def get_random_point(grid_in:np.ndarray) -> list():
+    def get_random_point(self, grid_in:np.ndarray) -> list():
         return [random.randint(0, grid_in.shape[0] - 1), random.randint(0, grid_in.shape[1] - 1)]
 
  

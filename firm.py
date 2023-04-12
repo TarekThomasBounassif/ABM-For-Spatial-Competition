@@ -20,6 +20,7 @@ class Firm:
         # Track history of a firms market share
         self.market_share = 0
         self.market_share_history = []
+        self.market_share_list_history = []
         
         # Track firm revenue and history
         self.revenue = 0
