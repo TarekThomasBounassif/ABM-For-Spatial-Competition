@@ -52,7 +52,6 @@ class EnvGrid:
                 system_grid = self.plot_population(system_grid)
 
         self.total_market_size = np.sum(np.sum(system_grid))
-        #print(self.total_market_size)
         self.system_grid = system_grid
 
     def generate_clusters(self, grid_in:np.ndarray) -> None:

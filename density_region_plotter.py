@@ -145,22 +145,13 @@ def plot_regions(sim_in, axs):
     print(sim_in.max_iters)
 
 def plot_combine_density(sim_in):
-
     model_in = sim_in.model_env
-
-    # Create the figure and subplots
     fig, axs = plt.subplots(2, 2, figsize=(10, 10), sharey=False)
-
-    # Plot the price history in the first subplot
     desnity_map_test(model_in, axs)
-
     plot_regions(sim_in, axs)
-
     fig.set_facecolor('0.9')
     fig.set_edgecolor('black')
     axs[0, 1].legend(title="Firms", bbox_to_anchor=(1.05, 0.5), loc='center left')
-
-    # Show the plot
     plt.savefig('plots/price_charts/{exp}.png'.format(exp="1"))
     plt.show()
 
