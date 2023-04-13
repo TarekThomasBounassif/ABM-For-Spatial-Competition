@@ -65,8 +65,12 @@ class Model:
                     if min_d < min_dist:
                         min_dist = min_d
                 if min_dist > (self.grid_params['Size'] / 6):
-                    self.firm_dict[i] = firm.Firm(starting_pos, i, self.firm_params['StartPrice'])
-                    #self.firm_dict[i] = firm.Firm(starting_pos, i, random.randint(10, 30))
+                    
+                    # Either set to global shared initial price or random price.
+                    if self.firm_params['randPrice']:
+                        self.firm_dict[i] = firm.Firm(starting_pos, i, random.randint(10, 30))
+                    else:
+                        self.firm_dict[i] = firm.Firm(starting_pos, i, self.firm_params['StartPrice'])
                     break 
 
     def consider_position(self, firm_id:int, new_pos:list, price_change:int=None) -> Tuple[int, int]:

@@ -152,7 +152,7 @@ def plot_combine_density(sim_in):
     fig.set_facecolor('0.9')
     fig.set_edgecolor('black')
     axs[0, 1].legend(title="Firms", bbox_to_anchor=(1.05, 0.5), loc='center left')
-    plt.savefig('plots/price_charts/{exp}.png'.format(exp="1"))
+    #plt.savefig('plots/price_charts/{exp}.png'.format(exp="1"))
     plt.show()
 
 

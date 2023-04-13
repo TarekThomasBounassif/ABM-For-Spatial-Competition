@@ -9,6 +9,7 @@ grid_params = {
 firm_params = {
     'FirmCount': 7,
     'StartPrice': 25,
+    'randPrice':False,
     'Seed': 1999111111111,
     'PriceChanges':[0,1, -1]
 }

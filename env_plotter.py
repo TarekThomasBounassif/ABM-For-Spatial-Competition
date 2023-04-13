@@ -60,7 +60,7 @@ def plot_1d_system(model_in:model.Model, with_firms:bool) -> None:
         ax.legend()
 
     plt.margins(0)
-    plt.savefig('plots/1d/1_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
+    #plt.savefig('plots/1d/1_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
 
 def plot_2d_system(model_in) -> None:
     
@@ -132,7 +132,7 @@ def plot_2d_system(model_in) -> None:
     # Set z-limit
     ax.set_zlim(0, 100)
     plt.margins(0)
-    plt.savefig('plots/2d/2_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
+    #plt.savefig('plots/2d/2_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
     return None
 
 def plot_2d_system_2(model_in) -> None:
@@ -200,6 +200,6 @@ def plot_2d_system_2(model_in) -> None:
     fig.set_edgecolor('black')
     ax.legend(title="Firms", bbox_to_anchor=(1.05, 0.5), loc='center left')
     plt.margins(0)
-    plt.savefig('plots/2d/2_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
+    #plt.savefig('plots/2d/2_d_non_uniform_system_{iter}.png'.format(iter=model_in.iteration))
     return None
 
